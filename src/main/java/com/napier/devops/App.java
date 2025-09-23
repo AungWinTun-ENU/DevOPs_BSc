@@ -26,5 +26,10 @@ public class App
         // Check document in collection
         Document myDoc = collection.find().first();
         System.out.println(myDoc.toJson());
+
+        // Connect to MongoDB
+        MongoClient mongoClient1 = new MongoClient("mongo-dbserver");
+
+
     }
 }
