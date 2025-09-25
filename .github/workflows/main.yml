@@ -8,21 +8,37 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
       - name: Set up JDK 24
-        uses: actions/setup-java@v2
+        uses: actions/setup-java@v4
         with:
           java-version: '24'
-          distribution: 'adopt'
-      - name: Setup network
+          distribution: 'temurin'
+
+      - name: Setup network and MongoDB
         run: |
           docker network create --driver bridge se-methods
           docker pull mongo
           docker run -d --name mongo-dbserver --network se-methods mongo
+
+      - name: Wait for Mongo
+        run: |
+          until docker exec mongo-dbserver mongosh --eval "db.adminCommand('ping')" >/dev/null 2>&1; do
+            echo "Waiting for Mongo..."
+            sleep 5
+          done
+
       - name: Build with Maven
-        run: mvn package
-      - name: Build
+        run: mvn clean package -DskipTests
+
+      - name: Build Docker Image
         run: docker build -t se_methods .
-      - name: Run image
-        run: docker run --network se-methods --name devopscontainer se_methods
-      - name: view logs
+
+      - name: Run App Container
+        run: docker run -d --network se-methods --name devopscontainer se_methods
+
+      - name: View Logs
         run: docker logs devopscontainer
+
+      - name: Check Container Status
+        run: docker ps -a
