@@ -4,7 +4,6 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 
-import java.sql.Statement;
 import java.util.ArrayList;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -14,17 +13,12 @@ public class AppIntegrationTest
     static App app;
 
     @BeforeAll
-    static void init() {
+    static void init()
+    {
         app = new App();
         app.connect("localhost:33060", 30000);
-        try {
-            Statement stmt = app.con.createStatement();
-            stmt.executeUpdate("INSERT INTO employees (emp_no, first_name, last_name) VALUES (255530, 'Ronghao', 'Garigliano');");
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
 
+    }
 
     @Test
     void testGetEmployee()

@@ -29,7 +29,7 @@ public class App {
     /**
      * Connection to MySQL database.
      */
-    public Connection con = null;
+    private Connection con = null;
 
     /**
      * Connect to the MySQL database.
