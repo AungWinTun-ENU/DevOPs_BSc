@@ -1,5 +1,4 @@
-name: CI Workflow for DevOps App
-
+name: A workflow for my Hello World App
 on: push
 
 jobs:
@@ -16,7 +15,7 @@ jobs:
         with:
           java-version: '24'
           distribution: 'adopt'
-      - name: Run Unit Tests
+      - name: Unit Tests
         run: mvn -Dtest=com.napier.devops.AppTest test
 
   IntegrationTests:
@@ -32,32 +31,16 @@ jobs:
         with:
           java-version: '24'
           distribution: 'adopt'
-      - name: Start MySQL container
+      - name: Integration Tests
         run: |
-          docker run --name employees \
-            -e MYSQL_ROOT_PASSWORD=root \
-            -e MYSQL_DATABASE=employees \
-            -e MYSQL_USER=test \
-            -e MYSQL_PASSWORD=test \
-            -p 33060:3306 -d mysql:8
-      - name: Wait for MySQL to be ready
-        run: |
-          for i in {1..30}; do
-            if docker exec employees mysql -u test -ptest -e "SELECT 1;" employees; then
-              echo "MySQL is ready"
-              break
-            fi
-            echo "Waiting for MySQL..."
-            sleep 2
-          done
-      - name: Run Integration Tests
-        run: mvn -Dtest=com.napier.devops.AppIntegrationTest test
-      - name: Stop and remove MySQL container
-        run: |
+          docker build -t database ./db 
+          docker run --name employees -dp 33060:3306 database
+          mvn -Dtest=com.napier.devops.AppIntegrationTest test
           docker stop employees
           docker rm employees
+          docker image rm database                    
 
-  Build:
+  build:
     name: Build and Start Using docker-compose
     runs-on: ubuntu-22.04
     steps:
@@ -70,7 +53,7 @@ jobs:
         with:
           java-version: '24'
           distribution: 'adopt'
-      - name: Package and Run docker-compose
+      - name: Package and Run docker compose
         run: |
           mvn package -DskipTests
           docker compose up --abort-on-container-exit
