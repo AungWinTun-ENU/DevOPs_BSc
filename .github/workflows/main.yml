@@ -15,12 +15,26 @@ jobs:
         with:
           java-version: '24'
           distribution: 'adopt'
-      - name: Unit Tests
-        run: mvn -Dtest=com.napier.devops.AppTest test
+      - name: Run Unit Tests
+        run: mvn -Dtest=AppTest test
 
   IntegrationTests:
     name: Integration Tests
     runs-on: ubuntu-22.04
+    services:
+      mysql:
+        image: mysql:8
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: employees
+        ports:
+          - 33060:3306
+        options: >-
+          --health-cmd "mysqladmin ping -h localhost -uroot -proot"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -31,16 +45,14 @@ jobs:
         with:
           java-version: '24'
           distribution: 'adopt'
-      - name: Integration Tests
+      - name: Wait for MySQL to be ready
         run: |
-          docker build -t database ./db 
-          docker run --name employees -dp 33060:3306 database
-          mvn -Dtest=com.napier.devops.AppIntegrationTest test
-          docker stop employees
-          docker rm employees
-          docker image rm database                    
+          echo "Waiting 30s for MySQL to start..."
+          sleep 30
+      - name: Run Integration Tests
+        run: mvn test -Dtest=AppIntegrationTest
 
-  build:
+  BuildAndDockerCompose:
     name: Build and Start Using docker-compose
     runs-on: ubuntu-22.04
     steps:
@@ -53,7 +65,7 @@ jobs:
         with:
           java-version: '24'
           distribution: 'adopt'
-      - name: Package and Run docker compose
+      - name: Package and Run docker-compose
         run: |
           mvn package -DskipTests
           docker compose up --abort-on-container-exit
