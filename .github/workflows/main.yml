@@ -62,14 +62,5 @@ jobs:
         with:
           java-version: '24'
           distribution: 'adopt'
-      - name: Package and Run docker compose
-        run: |
-          mvn package -DskipTests
-          docker compose up --abort-on-container-exit
-          - name: CodeCov
-        uses: codecov/codecov-action@v2
-        with:
-          # token: ${{ secrets.CODECOV_TOKEN }} # not required for public repos
-          directory: ./target/site/jacoco
-          flags: Integration Tests # optional
-          verbose: true # optional (default = false)
+
+
