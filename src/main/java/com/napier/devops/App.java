@@ -43,26 +43,37 @@ public class App {
             System.exit(-1);
         }
 
+        // Get credentials from system properties, with defaults
+        String dbHost = System.getProperty("db.host", "localhost");
+        String dbPort = System.getProperty("db.port", "3306");
+        String dbUser = System.getProperty("db.user", "root");
+        String dbPassword = System.getProperty("db.password", "example");
+
         int retries = 10;
         for (int i = 0; i < retries; ++i) {
             System.out.println("Connecting to database...");
             try {
                 // Wait a bit for db to start
                 Thread.sleep(delay);
+
                 // Connect to database
-                con = DriverManager.getConnection("jdbc:mysql://" + location
-                                + "/employees?allowPublicKeyRetrieval=true&useSSL=false",
-                        "root", "example");
+                con = DriverManager.getConnection(
+                        "jdbc:mysql://" + dbHost + ":" + dbPort + "/employees?allowPublicKeyRetrieval=true&useSSL=false",
+                        dbUser,
+                        dbPassword
+                );
+
                 System.out.println("Successfully connected");
                 break;
             } catch (SQLException sqle) {
-                System.out.println("Failed to connect to database attempt " +                                  Integer.toString(i));
+                System.out.println("Failed to connect to database attempt " + i);
                 System.out.println(sqle.getMessage());
             } catch (InterruptedException ie) {
                 System.out.println("Thread interrupted? Should not happen.");
             }
         }
     }
+
 
     /**
      * Disconnect from the MySQL database.
