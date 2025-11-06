@@ -52,6 +52,4 @@ public class AppTest
         employees.add(emp);
         app.printSalaries(employees);
     }
-
-
 }
