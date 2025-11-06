@@ -21,62 +21,24 @@ jobs:
   IntegrationTests:
     name: Integration Tests
     runs-on: ubuntu-22.04
-
-    # 💡 FIX 1: Define the MySQL service using GitHub Actions 'services'
-    services:
-      # The service name 'mysql' becomes the network hostname
-      mysql:
-        image: mysql/mysql-server:8.0
-        env:
-          # Match the credentials in App.java
-          MYSQL_ROOT_PASSWORD: example
-          MYSQL_DATABASE: employees
-          # 💡 FIX 2 (CRITICAL): This variable allows the 'root' user to connect from any host (%)
-          # This resolves the "Host '172.17.0.1' is not allowed" error.
-          MYSQL_ROOT_HOST: "%"
-        # Use an internal port mapping (optional, but good practice)
-        ports:
-          - 3306:3306
-        # Healthcheck to ensure the DB is ready before Maven starts
-        options: >
-          --health-cmd "mysqladmin ping"
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 10
-
     steps:
       - name: Checkout
         uses: actions/checkout@v4
         with:
           submodules: recursive
-
       - name: Set up JDK 24
         uses: actions/setup-java@v4
         with:
           java-version: '24'
           distribution: 'adopt'
-          cache: maven
-
-      # 💡 FIX 3: Wait explicitly for the database health check to pass
-      - name: Wait for MySQL
+      - name: Integration Tests
         run: |
-          echo "Waiting for MySQL to be healthy..."
-          for i in {1..20}; do
-            # Check the health status of the 'mysql' service
-            if docker inspect --format='{{json .State.Health.Status}}' mysql | grep -q "healthy"; then
-              echo "MySQL is healthy."
-              exit 0
-            fi
-            sleep 3
-          done
-          echo "MySQL did not become healthy in time."
-          exit 1
-
-      # 💡 FIX 4: Run Tests, passing the service name 'mysql' as the host
-      # We assume AppIntegrationTest calls App.main or a similar method that uses args[0]
-      # The host is 'mysql:3306' and the delay is reduced to 500ms since we already waited for health
-      - name: Run Integration Tests
-        run: mvn -Dtest=com.napier.devops.AppIntegrationTest test -Dexec.args="mysql:3306 500"
+          docker build -t database ./db 
+          docker run --name employees -dp 33060:3306 database
+          mvn -Dtest=com.napier.devops.AppIntegrationTest test
+          docker stop employees
+          docker rm employees
+          docker image rm database                    
 
   build:
     name: Build and Start Using docker-compose
