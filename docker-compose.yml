@@ -1,22 +1,18 @@
-version: '3.8'
-
+version: '3'
 services:
+  # Application Dockerfile is in same folder which is .
   app:
-    build: ./app
-    depends_on:
-      - db
-    environment:
-      DB_HOST: db        # Service name of the MySQL container
-      DB_PORT: 3306      # MySQL container port
-      DB_USER: root
-      DB_PASSWORD: example
+    build: .
 
+  # db is is db folder
   db:
-    build: ./db
+    build: db/.
     restart: always
     environment:
       MYSQL_ROOT_PASSWORD: example
       MYSQL_DATABASE: employees
       MYSQL_ROOT_HOST: '%'
     ports:
-      - "33060:3306"   # Exposes MySQL to host machine if needed
+      - "33060:3306"
+
+
