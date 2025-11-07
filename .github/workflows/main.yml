@@ -53,6 +53,7 @@ jobs:
           flags: Integration Tests # optional
           verbose: true # optional (default = false)
 
+
   build:
     name: Build and Start Using docker-compose
     runs-on: ubuntu-22.04
