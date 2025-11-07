@@ -33,8 +33,13 @@ jobs:
           distribution: 'adopt'
       - name: Integration Tests
         run: |
-          docker build -t database ./db 
-          docker run --name employees -dp 33060:3306 database
+          docker build -t database ./db
+          docker run --name employees -dp 33060:3306 \
+          -e MYSQL_ROOT_PASSWORD=example \
+          -e MYSQL_ROOT_HOST=% \
+          database
+          # wait a few seconds for MySQL to be ready
+          sleep 20
           mvn -Dtest=com.napier.devops.AppIntegrationTest test
           docker stop employees
           docker rm employees
