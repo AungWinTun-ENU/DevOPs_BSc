@@ -53,6 +53,25 @@ jobs:
           flags: Integration Tests # optional
           verbose: true # optional (default = false)
 
+
+  JestTests:
+    name: Node.js Jest Tests
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run Jest tests with coverage
+        run: npx jest --coverage
+
   build:
     name: Build and Start Using docker-compose
     runs-on: ubuntu-22.04
