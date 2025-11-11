@@ -45,13 +45,17 @@ jobs:
           docker rm employees
           docker image rm database    
 
+    
+
       - name: CodeCov
-        uses: codecov/codecov-action@v2
+        uses: codecov/codecov-action@v4.0.1
         with:
-          token: ${{ secrets.CODECOV_TOKEN }} # not required for public repos
-          directory: ./target/site/jacoco
-          flags: Integration Tests # optional
-          verbose: true # optional (default = false)
+            token: ${{ secrets.CODECOV_TOKEN }} # now required for public repos too
+            files: ./target/site/jacoco/jacoco.xml
+            flags: Integration Tests # optional
+            verbose: true # optional (default = false)
+            slug: AungWinTun-ENU/DevOPs_BSc
+
 
 
   build:
